@@ -1,3 +1,12 @@
+from enum import Enum
+
+
+class RenderOrder(Enum):
+    CORPSE = 1
+    ITEM = 2
+    ACTOR = 3
+
+
 def render_all(con, entities, game_map, fov_recompute, root_console, screen_width, screen_height, colors):
     if fov_recompute:
         for x, y in game_map:
@@ -17,8 +26,10 @@ def render_all(con, entities, game_map, fov_recompute, root_console, screen_widt
                 else:
                     con.draw_char(x, y, None, fg=None, bg=colors.get('dark_ground'))
 
+    entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
+
     # Draw all entites in the list
-    for entity in entities:
+    for entity in entities_in_render_order:
         draw_entity(con, entity, game_map.fov)
 
     root_console.blit(con, 0, 0, screen_width, screen_height, 0, 0)
