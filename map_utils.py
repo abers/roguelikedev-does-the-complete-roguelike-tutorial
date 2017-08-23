@@ -2,6 +2,10 @@
 from tdl.map import Map
 from entity import Entity
 
+from game_messages import Message
+
+from item_functions import heal, cast_lightning, cast_fireball, cast_confuse
+
 from components.ai import BasicMonster
 from components.fighter import Fighter
 from components.item import Item
@@ -85,8 +89,20 @@ def place_entities(room, entities, max_monsters_per_room, max_items_per_room, co
         y = randint(room.y1 + 1, room.y2 - 1)
 
         if not any([entity for entity in entities if entity.x == x and entity.y == y]):
-            item_component = Item()
-            item = Entity(x, y, '!', colors.get('violet'), 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component)
+            item_chance = randint(0, 100)
+
+            if item_chance < 70:
+                item_component = Item(use_function=heal, amount=4)
+                item = Entity(x, y, '!', colors.get('violet'), 'Healing Potion', render_order=RenderOrder.ITEM, item=item_component)
+            elif item_chance < 80:
+                item_component = Item(use_function=cast_fireball, targeting=True, targeting_message=Message('Left-click a target for the fireball, or right-click to cancel.', colors.get('light_cyan')), damage=12, radius=3)
+                item = Entity(x, y, '#', colors.get('red'), 'Fireball Scroll', render_order=RenderOrder.ITEM, item=item_component)
+            elif item_chance < 90:
+                item_component = Item(use_function=cast_confuse, targeting=True, targeting_message=Message('Left-click an enemy to confuse it, or right-click to cancel.', colors.get('light_cyan')))
+                item = Entity(x, y, '#', colors.get('light_pink'), 'Confusion Scroll', render_order=RenderOrder.ITEM, item=item_component)
+            else:
+                item_component = Item(use_function=cast_lightning, damage=20, maximum_range=5)
+                item = Entity(x, y, '#', colors.get('yellow'), 'Lightning Scroll', render_order=RenderOrder.ITEM, item=item_component)
 
             entities.append(item)
 
